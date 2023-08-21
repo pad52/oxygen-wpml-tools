@@ -23,7 +23,8 @@ Usage is the following:
     Save!
 
 TODO:
-    Export in a single .POT file, import from single .PO file in order to use normal translation softwares.
+
+     Export in a single .POT file, import from single .PO file in order to use normal translation softwares.
 
 
 # oxy_json_exporter.php
@@ -36,6 +37,7 @@ Usage is the following:
     donwload the JSONs generated 
 
 TODO:
+
     BUG fixes!
     transform in a WP plugin
     
