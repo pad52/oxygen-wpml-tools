@@ -58,7 +58,7 @@ function execute_query_and_create_files($connection) {
     }
 }
 
-$wp_config_file = '/home/u213-avngxthatvhn/www/paoloarnaldod.sg-host.com/public_html/pb/wp-config.php';
+$wp_config_file = '../../wp-config.php';
 $db_config = read_db_config($wp_config_file);
 $db_connection = connect_to_db($db_config);
 execute_query_and_create_files($db_connection);
