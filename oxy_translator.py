@@ -17,13 +17,14 @@
 #   CONDITIONS OF ANY KIND, either express or implied.
 ##
 
-import sys, json,csv
+import os, sys, json,csv
 import pandas as pd
 
 debug = 0
 
 MODE_OUTPUT = 0
 MODE_INPUT = 1
+MODE_OUTPUT_POT = 2
 
 search_keys = ["ct_content", "url", "icon_box_heading", "icon_box_text"]
 
@@ -32,7 +33,8 @@ def find_content(json_obj, results_list):
     if isinstance(json_obj, dict):
         for key, value in json_obj.items():
             if key in search_keys:
-                results_list.append(value)
+                if len( value.strip() ) != 0:
+                    results_list.append(value)
             elif isinstance(value, (dict, list)):
                 find_content(value, results_list)
     elif isinstance(json_obj, list):
@@ -65,11 +67,16 @@ elif len(sys.argv) < 3:
     print("ERROR: Give me a json file at least!")
     sys.exit()
 elif len(sys.argv) >= 3:
-    if(str(sys.argv[1]) == "-o"):
+    
+    request = str(sys.argv[1])
+    
+    if(request == "-o"):
         mode = MODE_OUTPUT
     
         if len(sys.argv) == 4:
-            csv_file = open(str(sys.argv[3]),'w');
+            csv_filename = str(sys.argv[3])
+            
+            csv_file = open(csv_filename,'w');
             csvwriter = csv.writer(csv_file)
             csvwriter.writerow( ['index','original_language','translation'] )
         elif len(sys.argv) > 4:
@@ -80,15 +87,30 @@ elif len(sys.argv) >= 3:
         mode = MODE_INPUT
         
         if( len(sys.argv) == 4 or len(sys.argv) == 5):
-            csv_file = open(str(sys.argv[3]),'r');
+            
+            csv_filename = str(sys.argv[3])
+            
+            csv_file = open(csv_filename,'r')
             if len(sys.argv) == 5:
-                json_out_file = open(str(sys.argv[4]),'w');
+                json_out_filename = str(sys.argv[4])
+                
+                json_out_file = open(json_out_filename,'w')
         elif len(sys.argv) > 5:
+            print("ERROR: Too many arguments!")
+            sys.exit()
+    elif(str(sys.argv[1]) == "-p"):
+        mode = MODE_OUTPUT_POT
+    
+        if len(sys.argv) == 4:
+            csv_filename = str(sys.argv[3])
+            
+            csv_file = open(csv_filename,'a');
+        elif len(sys.argv) > 4:
             print("ERROR: Too many arguments!")
             sys.exit()
         
     else:
-        print("ERROR: Arguments -i or -o accepted only.")
+        print("ERROR: Arguments -i or -o or -p accepted only.")
         sys.exit()
         
 else:
@@ -97,7 +119,8 @@ else:
 
  
 # Opening JSON file
-json_file = open(str(sys.argv[2]))
+json_filename = str(sys.argv[2])
+json_file = open(json_filename)
 
  
 # returns JSON object as
@@ -119,6 +142,29 @@ if(mode == MODE_OUTPUT):
         
         if len(sys.argv) > 3:
             csvwriter.writerow( [idx, value] )
+        else:
+            print(f"Value {idx}: {value}")
+            
+    if len(sys.argv) > 3:
+        csv_file.close()
+
+if(mode == MODE_OUTPUT_POT):
+    
+    # Initialize an empty list to store the results
+    results = []
+
+    # Call the function to find and store "ct_content" values in the results list
+    find_content(nested_json, results)
+
+
+    # Print the values of "ct_content" keys
+    for idx, value in enumerate(results, start=1):
+        
+        if len(sys.argv) > 3:
+            csv_file.write( "#: {0} index:{1} \n".format( os.path.basename(json_filename) ,idx) )
+            csv_file.write("msgid \"{0}\"     \n".format(value) )
+            csv_file.write("msgstr \"\"     \n\n")
+
         else:
             print(f"Value {idx}: {value}")
             
