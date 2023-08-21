@@ -32,7 +32,7 @@ Script that dumps from the database every JSON in every language
 
 Usage is the following:
 
-    Upload the script somewhere in your wp installation
+    Upload the script in wp-content/plugins inside your wp installation
     visit the script address from the browser or from the command line using php interpreter
     donwload the JSONs generated 
 
