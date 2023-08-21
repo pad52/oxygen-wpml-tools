@@ -27,7 +27,7 @@ TODO:
      Export in a single .POT file, import from single .PO file in order to use normal translation softwares.
 
 
-# oxy_json_exporter.php
+# oxy_json_exporter.php !NOT READY
 Script that dumps from the database every JSON in every language 
 
 Usage is the following:
@@ -39,5 +39,6 @@ Usage is the following:
 TODO:
 
     BUG fixes!
-    transform in a WP plugin
+    import the table_prefix from the wp_config.php file
+    transform in a WP plugin or in something to be used remotely (using REST API).
     
