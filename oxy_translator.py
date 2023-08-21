@@ -20,7 +20,7 @@
 import sys, json,csv
 import pandas as pd
 
-debug = 1
+debug = 0
 
 MODE_OUTPUT = 0
 MODE_INPUT = 1
