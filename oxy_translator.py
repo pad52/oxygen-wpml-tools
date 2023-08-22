@@ -17,7 +17,7 @@
 #   CONDITIONS OF ANY KIND, either express or implied.
 ##
 
-import os, sys, json,csv
+import os, sys, json,csv, polib
 import pandas as pd
 
 debug = 0
@@ -25,9 +25,11 @@ debug = 0
 MODE_OUTPUT = 0
 MODE_INPUT = 1
 MODE_OUTPUT_POT = 2
+MODE_INPUT_JSON = 3
 
 search_keys = ["ct_content", "url", "icon_box_heading", "icon_box_text"]
 exclude = ["<style", "<table"]
+
 
 def find_content(json_obj, results_list):
     if isinstance(json_obj, dict):
@@ -58,10 +60,28 @@ def update_content(json_obj, values_list, index=0):
     return index
 
 
+def searchreplace_content(json_obj, msgid, msgstr):
+    if isinstance(json_obj, dict):
+        for key, value in json_obj.items():
+            if key in search_keys and value == msgid:
+                json_obj[key] = msgstr
+            elif isinstance(value, (dict, list)):
+                searchreplace_content(value, msgid, msgstr)
+    elif isinstance(json_obj, list):
+        for item in json_obj:
+            searchreplace_content(item, msgid, msgstr)
+
+    return json_obj
+
+
+# MAIN
+
 if len(sys.argv) < 2:
     print("Usage\n \
         From JSON to CSV: oxy_translator.py -o [JSON INPUT FILE] (optional)[CSV OUTPUT FILE] or\n \
         From CSV to JSON: oxy_translator.py -i [JSON INPUT FILE] [CSV INPUT FILE] (optional)[JSON OUTPUT FILE]\n \
+        From JSON to POT: oxy_translator.py -p [JSON INPUT FILE] (optional)[POT OUTPUT FILE] or\n \
+        From PO to JSON: oxy_translator.py -j [JSON (ORIGINAL LANGUAGE) INPUT FILE] [PO INPUT FILE] (optional)[JSON OUTPUT FILE] or\n \
         If the optional [OUTPUT FILE] it is not specified the output will be stdout.")
     sys.exit()
 elif len(sys.argv) < 3:
@@ -109,9 +129,23 @@ elif len(sys.argv) >= 3:
         elif len(sys.argv) > 4:
             print("ERROR: Too many arguments!")
             sys.exit()
+    elif(str(sys.argv[1]) == "-j"):
+        mode = MODE_INPUT_POT
         
+        if( len(sys.argv) == 4 or len(sys.argv) == 5):
+            
+            csv_filename = str(sys.argv[3])
+            
+            csv_file = open(csv_filename,'r')
+            if len(sys.argv) == 5:
+                json_out_filename = str(sys.argv[4])
+                
+                json_out_file = open(json_out_filename,'w')
+        elif len(sys.argv) > 5:
+            print("ERROR: Too many arguments!")
+            sys.exit()
     else:
-        print("ERROR: Arguments -i or -o or -p accepted only.")
+        print("ERROR: Arguments -i, -o, -p, -j accepted only.")
         sys.exit()
         
 else:
@@ -186,6 +220,24 @@ elif(mode == MODE_INPUT):
             print(f"Value {idx}: {value}")    
         
     idx = update_content(nested_json, translations)
+    if debug:
+        print(f"{idx} occurences updated")
+            
+    if len(sys.argv) == 5:
+        json_out_file.write(json.dumps(nested_json))
+        json_out_file.close()
+    else:
+        print(nested_json)
+        
+elif(mode == MODE_INPUT_POT):
+    
+    data = polib.pofile( csv_file )
+    
+    for entry in data:
+        if debug:
+            print(entry.msgid, entry.msgstr)
+        idx = searchreplace_content(nested_json, entry.msgid, entry.msgstr)
+    
     if debug:
         print(f"{idx} occurences updated")
             
