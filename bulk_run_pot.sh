@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for f in ../texts/jsons/*.json; do
-  ./oxy_translator.py -p $f "export.pot"
+for f in ../texts/jsons/it/*.json; do
+  ./oxy_translator.py -p $f "../texts/pots/it-all.pot"
 done
 

@@ -27,14 +27,15 @@ MODE_INPUT = 1
 MODE_OUTPUT_POT = 2
 
 search_keys = ["ct_content", "url", "icon_box_heading", "icon_box_text"]
-
+exclude = ["<style", "<table"]
 
 def find_content(json_obj, results_list):
     if isinstance(json_obj, dict):
         for key, value in json_obj.items():
             if key in search_keys:
-                if len( value.strip() ) != 0:
-                    results_list.append(value)
+                if (mode == MODE_OUTPUT_POT) and (len( value.strip() ) != 0):
+                    if any([x not in value for x in exclude]):
+                        results_list.append(value)
             elif isinstance(value, (dict, list)):
                 find_content(value, results_list)
     elif isinstance(json_obj, list):
@@ -162,7 +163,7 @@ if(mode == MODE_OUTPUT_POT):
         
         if len(sys.argv) > 3:
             csv_file.write( "#: {0} index:{1} \n".format( os.path.basename(json_filename) ,idx) )
-            csv_file.write("msgid \"{0}\"     \n".format(value) )
+            csv_file.write("msgid \"{0}\"     \n".format( value.replace( '"','\\"' ) ) )
             csv_file.write("msgstr \"\"     \n\n")
 
         else:
