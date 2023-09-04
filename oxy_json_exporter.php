@@ -57,7 +57,7 @@ function execute_query_and_create_files($connection) {
     }
 }
 
-$wp_config_file = '../../../wp-config.php';
+$wp_config_file = $argv[1];
 $db_config = read_db_config($wp_config_file);
 $db_connection = connect_to_db($db_config);
 execute_query_and_create_files($db_connection);
