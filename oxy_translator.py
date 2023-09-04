@@ -196,9 +196,9 @@ if(mode == MODE_OUTPUT_POT):
     for idx, value in enumerate(results, start=1):
         
         if len(sys.argv) > 3:
-            csv_file.write( "#: {0} index:{1} \n".format( os.path.basename(json_filename) ,idx) )
-            csv_file.write("msgid \"{0}\"     \n".format( value.replace( '"','\\"' ) ) )
-            csv_file.write("msgstr \"\"     \n\n")
+            csv_file.write( '#: {0} index:{1} \n'.format( os.path.basename(json_filename) ,idx) )
+            csv_file.write('msgid "{0}"     \n'.format( value.replace( '"','\"' ) ) )
+            csv_file.write('msgstr ""     \n\n')
 
         else:
             print(f"Value {idx}: {value}")
