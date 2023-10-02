@@ -22,8 +22,8 @@ import pandas as pd
 from thefuzz import fuzz
 
 DEBUG = 1
-ENABLE_FUZZY = 0
-FUZZY_RATIO = 80
+ENABLE_FUZZY = 1
+FUZZY_RATIO = 98
 
 
 
@@ -81,11 +81,11 @@ def update_po_content(json_obj, msgid, msgstr, index=0):
                         json_obj[key] = msgstr
                         index += 1
                 else:
-                    val_after = json_obj[key].replace(msgid,msgstr)
-                    if(json_obj[key] != val_after):
+                    #val_after = json_obj[key].replace(msgid,msgstr)
+                    if(json_obj[key].strip() == msgid.strip()):
                         if(DEBUG):
                             print(f"REPLACED - {json_obj[key]} WITH {msgstr}")
-                        json_obj[key] = val_after
+                        json_obj[key] = msgstr
                         index += 1
                 
                   
