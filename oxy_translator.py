@@ -17,15 +17,21 @@
 #   CONDITIONS OF ANY KIND, either express or implied.
 ##
 
-import os, sys, json,csv, polib
+import os, sys, json,csv, polib,re 
 import pandas as pd
+from thefuzz import fuzz
 
-debug = 0
+DEBUG = 1
+ENABLE_FUZZY = 0
+FUZZY_RATIO = 80
+
+
 
 MODE_OUTPUT = 0
 MODE_INPUT = 1
 MODE_OUTPUT_POT = 2
 MODE_INPUT_JSON = 3
+MODE_INPUT_POT = 4
 
 search_keys = ["ct_content", "url", "icon_box_heading", "icon_box_text"]
 exclude = ["<style", "<table"]
@@ -59,19 +65,36 @@ def update_content(json_obj, values_list, index=0):
             index = update_content(item, values_list, index)
     return index
 
-
-def searchreplace_content(json_obj, msgid, msgstr):
+def update_po_content(json_obj, msgid, msgstr, index=0):
     if isinstance(json_obj, dict):
         for key, value in json_obj.items():
-            if key in search_keys and value == msgid:
-                json_obj[key] = msgstr
+            if key in search_keys:
+                
+                if(ENABLE_FUZZY):
+                    ratio = fuzz.ratio(json_obj[key], msgid)
+   
+                    if ratio > FUZZY_RATIO:
+                                        
+                        if(DEBUG):
+                            print(f"MATCHED - {json_obj[key]} - AGAINST - {msgid} - AT {ratio}%")
+                                
+                        json_obj[key] = msgstr
+                        index += 1
+                else:
+                    val_after = json_obj[key].replace(msgid,msgstr)
+                    if(json_obj[key] != val_after):
+                        if(DEBUG):
+                            print(f"REPLACED - {json_obj[key]} WITH {msgstr}")
+                        json_obj[key] = val_after
+                        index += 1
+                
+                  
             elif isinstance(value, (dict, list)):
-                searchreplace_content(value, msgid, msgstr)
+                index = update_po_content(value, msgid, msgstr, index)
     elif isinstance(json_obj, list):
         for item in json_obj:
-            searchreplace_content(item, msgid, msgstr)
-
-    return json_obj
+            index = update_po_content(item, msgid, msgstr, index)
+    return index
 
 
 # MAIN
@@ -131,7 +154,7 @@ elif len(sys.argv) >= 3:
             sys.exit()
     elif(str(sys.argv[1]) == "-j"):
         mode = MODE_INPUT_POT
-        
+        print("MODE INPUT POT")
         if( len(sys.argv) == 4 or len(sys.argv) == 5):
             
             csv_filename = str(sys.argv[3])
@@ -155,13 +178,14 @@ else:
  
 # Opening JSON file
 json_filename = str(sys.argv[2])
-json_file = open(json_filename)
+json_file = open(json_filename, "r")
 
  
 # returns JSON object as
 # a dictionary
 nested_json = json.load(json_file)
 
+    
 
 if(mode == MODE_OUTPUT):
     
@@ -215,12 +239,12 @@ elif(mode == MODE_INPUT):
     translations = data["translation"].tolist()
     
     # Debug only
-    if debug:
+    if DEBUG:
         for idx, value in enumerate(translations, start=1):
             print(f"Value {idx}: {value}")    
         
     idx = update_content(nested_json, translations)
-    if debug:
+    if DEBUG:
         print(f"{idx} occurences updated")
             
     if len(sys.argv) == 5:
@@ -231,14 +255,16 @@ elif(mode == MODE_INPUT):
         
 elif(mode == MODE_INPUT_POT):
     
-    data = polib.pofile( csv_file )
+    data = polib.pofile( csv_filename )
     
+    idx = 0
+
+    new_nested_json = ''
     for entry in data:
-        if debug:
-            print(entry.msgid, entry.msgstr)
-        idx = searchreplace_content(nested_json, entry.msgid, entry.msgstr)
-    
-    if debug:
+        
+        idx += update_po_content(nested_json, entry.msgid, entry.msgstr)
+                
+    if DEBUG:
         print(f"{idx} occurences updated")
             
     if len(sys.argv) == 5:
