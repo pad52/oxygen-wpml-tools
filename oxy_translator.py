@@ -21,7 +21,7 @@ import os, sys, json,csv, polib,re
 import pandas as pd
 from thefuzz import fuzz
 
-DEBUG = 1
+DEBUG = 0
 ENABLE_FUZZY = 1
 FUZZY_RATIO = 98
 
@@ -41,7 +41,7 @@ def find_content(json_obj, results_list):
     if isinstance(json_obj, dict):
         for key, value in json_obj.items():
             if key in search_keys:
-                if (mode == MODE_OUTPUT_POT) and (len( value.strip() ) != 0):
+                if (len( value.strip() ) != 0):
                     if any([x not in value for x in exclude]):
                         results_list.append(value)
             elif isinstance(value, (dict, list)):
@@ -255,6 +255,13 @@ elif(mode == MODE_INPUT):
         
 elif(mode == MODE_INPUT_POT):
     
+    # Initialize an empty list to store the results
+    results = []
+
+    # Call the function to find and store "ct_content" values in the results list
+    find_content(nested_json, results)
+    
+    
     data = polib.pofile( csv_filename )
     
     idx = 0
@@ -265,7 +272,8 @@ elif(mode == MODE_INPUT_POT):
         idx += update_po_content(nested_json, entry.msgid, entry.msgstr)
                 
     if DEBUG:
-        print(f"{idx} occurences updated")
+        print(results)
+    print(f"{idx} occurences updated out of {len(results)} found.")
             
     if len(sys.argv) == 5:
         json_out_file.write(json.dumps(nested_json))
