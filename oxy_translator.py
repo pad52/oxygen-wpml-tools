@@ -22,7 +22,7 @@ import pandas as pd
 from thefuzz import fuzz
 
 DEBUG = 0
-ENABLE_FUZZY = 1
+ENABLE_FUZZY = 1 #Disabled for urls
 FUZZY_RATIO = 98
 
 
@@ -70,14 +70,13 @@ def update_po_content(json_obj, msgid, msgstr, index=0):
         for key, value in json_obj.items():
             if key in search_keys:
                 
-                if(ENABLE_FUZZY):
+                if( ENABLE_FUZZY and 
+                   not (json_obj[key].startswith("https:") or json_obj[key].startswith("http:")) ):
                     ratio = fuzz.ratio(json_obj[key], msgid)
    
                     if ratio > FUZZY_RATIO:
-                                        
                         if(DEBUG):
                             print(f"MATCHED - {json_obj[key]} - AGAINST - {msgid} - AT {ratio}%")
-                                
                         json_obj[key] = msgstr
                         index += 1
                 else:
@@ -266,13 +265,9 @@ elif(mode == MODE_INPUT_POT):
     
     idx = 0
 
-    new_nested_json = ''
     for entry in data:
-        
         idx += update_po_content(nested_json, entry.msgid, entry.msgstr)
-                
-    if DEBUG:
-        print(results)
+
     print(f"{idx} occurences updated out of {len(results)} found.")
             
     if len(sys.argv) == 5:
