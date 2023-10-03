@@ -24,7 +24,9 @@ Usage is the following:
 
 TODO:
 
-     Export in a single .POT file, import from single .PO file in order to use normal translation softwares.
+    Better handling of command line options (in order to enable fuzzyness, debugging etc.)
+    ~~Export in a single .POT file,~~
+    ~~import from single .PO file in order to use normal translation softwares.~~
 
 
 # oxy_json_exporter.php !NOT READY
@@ -40,5 +42,9 @@ TODO:
 
     BUG fixes!
     import the table_prefix from the wp_config.php file
-    transform in a WP plugin or in something to be used remotely (using REST API).
+    transform in a WP plugin or in something that can be used remotely (using REST API).
     
+
+# bulk_run-*
+Scripts that automatize the process of CSV/POT file making and JSONs copy pasting
+
