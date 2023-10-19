@@ -29,7 +29,7 @@ TODO:
     ~~import from single .PO file in order to use normal translation softwares.~~
 
 
-# oxy_json_exporter.php !NOT READY
+# oxy_json_exporter.php
 Script that dumps from the database every JSON in every language 
 
 Usage is the following:

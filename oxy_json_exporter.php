@@ -33,6 +33,7 @@ function execute_query_and_create_files($connection) {
     $query = "
     SELECT jkh_postmeta.post_id AS postId, 
     jkh_postmeta.meta_value AS jsonValue, 
+    jkh_posts.post_type as type,
     jkh_posts.post_name AS slug,
     jkh_icl_translations.language_code AS lang
     FROM jkh_postmeta 
@@ -41,8 +42,9 @@ function execute_query_and_create_files($connection) {
     INNER JOIN jkh_icl_translations 
     ON jkh_postmeta.post_id = jkh_icl_translations.element_id
     WHERE jkh_postmeta.meta_key LIKE 'ct_builder_json' AND 
-    jkh_postmeta.meta_value LIKE '%{\"id\":0%' AND
-    jkh_icl_translations.element_type LIKE 'post_page'
+    jkh_postmeta.meta_value LIKE '%{\"%' AND
+    (jkh_posts.post_type LIKE 'page' OR 
+    jkh_posts.post_type LIKE 'ct_template')
     ORDER BY jkh_postmeta.post_id ASC";
 
     $result = $connection->query($query);
@@ -50,8 +52,9 @@ function execute_query_and_create_files($connection) {
     while ($row = $result->fetch_assoc()) {
         $lang = $row['lang'];
         $slug = $row['slug'];
+        $type = $row['type'];
         $data = $row['jsonValue'];
-        $filename = "jsons/$lang-$slug.json";
+        $filename = "jsons/$lang/$lang-$type-$slug.json";
         file_put_contents($filename, $data);
         
     }

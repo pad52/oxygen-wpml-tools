@@ -21,7 +21,7 @@ import os, sys, json,csv, polib,re
 import pandas as pd
 from thefuzz import fuzz
 
-DEBUG = 0
+DEBUG = 1
 ENABLE_FUZZY = 1 #Disabled for urls
 FUZZY_RATIO = 98
 
@@ -34,7 +34,7 @@ MODE_INPUT_JSON = 3
 MODE_INPUT_POT = 4
 
 search_keys = ["ct_content", "url", "icon_box_heading", "icon_box_text"]
-exclude = ["<style", "<table"]
+exclude = ["<style", "<table", "<span", "[oxygen"]
 
 
 def find_content(json_obj, results_list):
@@ -42,8 +42,11 @@ def find_content(json_obj, results_list):
         for key, value in json_obj.items():
             if key in search_keys:
                 if (len( value.strip() ) != 0):
-                    if any([x not in value for x in exclude]):
+                    if not any([x in value for x in exclude]):
                         results_list.append(value)
+                    else:
+                        if DEBUG:
+                            print(f"EXCLUDING {value}")
             elif isinstance(value, (dict, list)):
                 find_content(value, results_list)
     elif isinstance(json_obj, list):
@@ -219,7 +222,7 @@ if(mode == MODE_OUTPUT_POT):
     for idx, value in enumerate(results, start=1):
         
         if len(sys.argv) > 3:
-            csv_file.write( '#: {0} index:{1} \n'.format( os.path.basename(json_filename) ,idx) )
+            csv_file.write( '#: {0}:{1} \n'.format( os.path.basename(json_filename) ,idx) )
             csv_file.write('msgid "{0}"     \n'.format( value.replace( '"','\"' ) ) )
             csv_file.write('msgstr ""     \n\n')
 
