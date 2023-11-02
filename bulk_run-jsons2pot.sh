@@ -6,8 +6,8 @@
 #
 
 LANG="it"
-SOURCE="../texts/jsons/$LANG/*.json"
-DEST="../texts/pots/$LANG-everything.pot"
+SOURCE="../../texts/jsons/$LANG/*.json"
+DEST="../../texts/pots/$LANG-json-everything.pot"
 
 for f in $SOURCE; do
   ./oxy_translator.py -p $f $DEST

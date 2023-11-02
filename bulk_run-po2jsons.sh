@@ -7,8 +7,8 @@
 DEST_LANG="en"
 SOURCE_LANG="it"
 
-SOURCE="../texts/jsons/$SOURCE_LANG/*.json"
-PO_FILE="../texts/pots/oxygen-pages-$DEST_LANG.po"
+SOURCE="../../texts/jsons/$SOURCE_LANG/*.json"
+PO_FILE="../../texts/pots/oxygen-pages-$DEST_LANG.po"
 
 for f in $SOURCE; do
   echo "Doing ./oxy_translator.py -j $f $PO_FILE $DEST_FILE"
