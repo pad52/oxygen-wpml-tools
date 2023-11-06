@@ -50,49 +50,32 @@ def find_content(csv_obj, results_list):
                         if DEBUG:
                             print(f"EXCLUDING {value}")
 
-
-def update_content(json_obj, values_list, index=0):
-    if isinstance(json_obj, dict):
-        for key, value in json_obj.items():
-            if key in search_keys:
-                if index < len(values_list):
-                    json_obj[key] = values_list[index]
-                    index += 1
-            elif isinstance(value, (dict, list)):
-                index = update_content(value, values_list, index)
-    elif isinstance(json_obj, list):
-        for item in json_obj:
-            index = update_content(item, values_list, index)
-    return index
-
-def update_po_content(json_obj, msgid, msgstr, index=0):
-    if isinstance(json_obj, dict):
-        for key, value in json_obj.items():
-            if key in search_keys:
+def update_po_content(csv_obj, msgid, msgstr, index=0):
+    for col in search_keys:
+        if col in csv_obj:
+            if DEBUG:
+                print(f"{col} found")
+            values = data[col].tolist()
+            
+            for value in values:
                 
                 if( ENABLE_FUZZY and 
-                   not (json_obj[key].startswith("https:") or json_obj[key].startswith("http:")) ):
-                    ratio = fuzz.ratio(json_obj[key], msgid)
-   
+                    not (value.startswith("https:") or value.startswith("http:")) ):
+                    ratio = fuzz.ratio(value, msgid)
+
                     if ratio > FUZZY_RATIO:
                         if(DEBUG):
-                            print(f"MATCHED - {json_obj[key]} - AGAINST - {msgid} - AT {ratio}%")
-                        json_obj[key] = msgstr
+                            print(f"MATCHED - {value} - AGAINST - {msgid} - AT {ratio}%")
+                        csv_obj.replace( to_replace=value, value=msgstr, inplace=True )
                         index += 1
                 else:
                     #val_after = json_obj[key].replace(msgid,msgstr)
-                    if(json_obj[key].strip() == msgid.strip()):
+                    if(value.strip() == msgid.strip()):
                         if(DEBUG):
-                            print(f"REPLACED - {json_obj[key]} WITH {msgstr}")
-                        json_obj[key] = msgstr
+                            print(f"REPLACED - {value} WITH {msgstr}")
+                        csv_obj.replace( to_replace=value, value=msgstr, inplace=True )
                         index += 1
                 
-                  
-            elif isinstance(value, (dict, list)):
-                index = update_po_content(value, msgid, msgstr, index)
-    elif isinstance(json_obj, list):
-        for item in json_obj:
-            index = update_po_content(item, msgid, msgstr, index)
     return index
 
 
@@ -132,7 +115,6 @@ elif len(sys.argv) >= 3:
             if len(sys.argv) == 5:
                 csv_out_filename = str(sys.argv[4])
                 
-                csv_out_file = open(csv_out_filename,'w')
         elif len(sys.argv) > 5:
             print("ERROR: Too many arguments!")
             sys.exit()
@@ -149,9 +131,9 @@ else:
 csv_in_filename = str(sys.argv[2])
 
 # making data frame from csv
-data = pd.read_csv( csv_in_filename )
+data = pd.read_csv( csv_in_filename, lineterminator="\n", quoting=csv.QUOTE_ALL, dtype="string")
 data.fillna(value='', inplace=True)
- 
+data = data.replace(r'\n',' ', regex=True) 
 
 if(mode == MODE_OUTPUT_POT):
     
@@ -163,10 +145,12 @@ if(mode == MODE_OUTPUT_POT):
 
     # Print the values of "ct_content" keys
     for idx, value in enumerate(results, start=1):
+        value = value.replace( '\\' , '\\\\' )
+        value = value.replace( '"',r'\"' )
         
         if len(sys.argv) > 3:
             pot_file.write( '#: {0}:{1} \n'.format( os.path.basename(csv_in_filename) ,idx) )
-            pot_file.write('msgid "{0}"     \n'.format( value.replace( '"','\"' ) ) )
+            pot_file.write('msgid "{0}"     \n'.format( value ) )
             pot_file.write('msgstr ""     \n\n')
 
         else:
@@ -175,28 +159,6 @@ if(mode == MODE_OUTPUT_POT):
     if len(sys.argv) > 3:
         pot_file.close()
 
-elif(mode == MODE_INPUT):
-    
-    # making data frame from csv
-    data = pd.read_csv( csv_file )
-    data.fillna(value='', inplace=True)
-    
-    translations = data["translation"].tolist()
-    
-    # Debug only
-    if DEBUG:
-        for idx, value in enumerate(translations, start=1):
-            print(f"Value {idx}: {value}")    
-        
-    idx = update_content(nested_json, translations)
-    if DEBUG:
-        print(f"{idx} occurences updated")
-            
-    if len(sys.argv) == 5:
-        json_out_file.write(json.dumps(nested_json))
-        json_out_file.close()
-    else:
-        print(nested_json)
         
 elif(mode == MODE_INPUT_POT):
     
@@ -204,23 +166,23 @@ elif(mode == MODE_INPUT_POT):
     results = []
 
     # Call the function to find and store "ct_content" values in the results list
-    find_content(nested_json, results)
+    find_content(data, results)
     
     
-    data = polib.pofile( csv_filename )
+    po_data = polib.pofile( pot_filename )
     
     idx = 0
 
-    for entry in data:
-        idx += update_po_content(nested_json, entry.msgid, entry.msgstr)
+    for entry in po_data:
+        idx += update_po_content(data, entry.msgid, entry.msgstr)
 
     print(f"{idx} occurences updated out of {len(results)} found.")
             
     if len(sys.argv) == 5:
-        json_out_file.write(json.dumps(nested_json))
-        json_out_file.close()
+        data.to_csv(csv_out_filename)
+
     else:
-        print(nested_json)
+        print(data)
     
 
 sys.exit()

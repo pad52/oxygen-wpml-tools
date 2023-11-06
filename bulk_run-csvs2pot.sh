@@ -5,7 +5,7 @@
 # Since it append every occurence, be sure that the destination file is empty
 #
 
-LANG="it"
+LANG="en"
 SOURCE="../../texts/csvs/$LANG/*.csv"
 DEST="../../texts/pots/$LANG-csv-everything.pot"
 
