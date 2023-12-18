@@ -133,7 +133,7 @@ csv_in_filename = str(sys.argv[2])
 # making data frame from csv
 data = pd.read_csv( csv_in_filename, lineterminator="\n", quoting=csv.QUOTE_ALL, dtype="string")
 data.fillna(value='', inplace=True)
-data = data.replace(r'\n',' ', regex=True) 
+data = data.replace(r'\n','', regex=True) 
 
 if(mode == MODE_OUTPUT_POT):
     
@@ -150,7 +150,7 @@ if(mode == MODE_OUTPUT_POT):
         
         if len(sys.argv) > 3:
             pot_file.write( '#: {0}:{1} \n'.format( os.path.basename(csv_in_filename) ,idx) )
-            pot_file.write('msgid "{0}"     \n'.format( value ) )
+            pot_file.write('msgid "{0}"     \n'.format( value.strip() ) )
             pot_file.write('msgstr ""     \n\n')
 
         else:
