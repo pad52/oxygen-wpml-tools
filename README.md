@@ -2,52 +2,57 @@
 Tools for automating translation process between Oxygen builder and WPML
 
 Since I don't want to copy/paste every translated text field from a page to another inside the Oxygen Builder,
-I just made a very simple python script to automate at least the translation process.
-(you will keep doing copy paste between the JSON of a page to the JSON of the translated page)
+I made a very simple python script to automate at the translation process.
+~~(you will keep doing copy paste between the JSON of a page to the JSON of the translated page)~~
+I just made also a bash script to stop copy pasting and upload everything automatically.
+
+So now the method is the following:
+1) Upload _oxy_json_exporter.php_ and execute on your website.
+2) Download JSON files.
+3) Extract POT file with _oxy_translator.py_
+4) Translate with your favorite tool and get .PO files
+5) Use _bulk_run-upload-po2jsons.sh_ in order to translate and upload translated text.
+6) Enjoy!
+
 Hope it helps someone.
-
-# oxy_translator.py
-Script that can import/export contents and links from/to an Oxygen JSON file to/from a CSV file.
-
-Usage is the following:
-
-    Go to the Original, not translated page in the "Edit page" Wordpress backend (!not Edit with Oxygen),
-    Copy the JSON tab content (Yes you need to have the page ready, done with oxygen)
-    Paste it to file. I am using the Linux command line: "xclip -selection clipboard -o > original.json"
-    Run the script: "./oxy_translator.py -o original.json original.csv"
-    Edit original.csv filling the "translation" column and save it, for example in translated.csv
-    Run the script: "./oxy_translator.py -i original.json translated.csv translated.json
-    Copy the content of translated.json to clipboard. Using Linux "cat translated.json | xclip -selection clipboard"
-    Go to the Translated page in the "Edit page" Wordpress backend
-    Paste your clipboard in the JSON tab content.
-    Save!
-
-TODO:
-
-    Better handling of command line options (in order to enable fuzzyness, debugging etc.)
-    ~~Export in a single .POT file,~~
-    ~~import from single .PO file in order to use normal translation softwares.~~
-
 
 # oxy_json_exporter.php
 Script that dumps from the database every JSON in every language 
 
 Usage is the following:
 
-    Upload the script in wp-content/plugins inside your wp installation
-    visit the script address from the browser or from the command line using php interpreter
-    download the JSONs generated 
+    Upload the script inside your wp installation
+    visit the script address from the browser or from the command line using php cli
+    download the JSONs generated.
 
 TODO:
 
-    BUG fixes!
-    transform in a WP plugin or in something that can be used remotely (using REST API).
+    transform in a WP plugin or in something that can be used remotely.
 
     
-# bulk_run-*
-Scripts that automatize the process of CSV/POT file making and JSONs copy pasting
+
+# oxy_translator.py
+Script that can import/export contents and links from/to an Oxygen JSON file to/from a CSV/POT/PO file.
+
+Usage is the following:
+
+Method 1) extract a POT file out from a JSON file
+./oxy_translator.py -p $SOURCE.json $DEST.pot
+
+Method 2) translate a SOURCE_JSON file using a .PO file into a new DEST_JSON file
+./oxy_translator.py -j $SOURCE_JSON $PO_FILE $DEST_JSON
+
+CSV Methods are deprecated and should not be used anymore.
+
+
+# bulk_run-jsons2pot.sh
+Extracts a single POT file out from many JSON files.
+
+
+# bulk_run-po2jsons.sh
+Bulk translate of many JSON files using a single PO file.
 
 
 # bulk_run-upload-po2jsons.sh
-Scripts that automatically process JSONS (exported with oxy_json_exporter.php), translate them with a PO file and **UPLOAD** automatically in Wordpress!
-
+Scripts that automatically translates multiple JSON files (exported with _oxy_json_exporter.php_), 
+translates them with a PO file and **UPLOAD** automatically in Wordpress!
