@@ -36,15 +36,18 @@ Usage is the following:
 
     Upload the script in wp-content/plugins inside your wp installation
     visit the script address from the browser or from the command line using php interpreter
-    donwload the JSONs generated 
+    download the JSONs generated 
 
 TODO:
 
     BUG fixes!
-    import the table_prefix from the wp_config.php file
     transform in a WP plugin or in something that can be used remotely (using REST API).
-    
 
+    
 # bulk_run-*
 Scripts that automatize the process of CSV/POT file making and JSONs copy pasting
+
+
+# bulk_run-upload-po2jsons.sh
+Scripts that automatically process JSONS (exported with oxy_json_exporter.php), translate them with a PO file and **UPLOAD** automatically in Wordpress!
 

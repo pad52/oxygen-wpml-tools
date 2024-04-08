@@ -11,8 +11,8 @@ SOURCE="../../texts/jsons/$SOURCE_LANG/*.json"
 PO_FILE="../../texts/pots/oxygen-pages-$DEST_LANG.po"
 
 for f in $SOURCE; do
-  echo "Doing ./oxy_translator.py -j $f $PO_FILE $DEST_FILE"
   DEST_FILE=${f//"$SOURCE_LANG"/"$DEST_LANG"}
+  echo "Doing ./oxy_translator.py -j $f $PO_FILE $DEST_FILE"
   ./oxy_translator.py -j $f $PO_FILE $DEST_FILE
   
   cat $DEST_FILE | xclip -sel clip

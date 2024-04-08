@@ -21,7 +21,7 @@ import os, sys, json,csv, polib,re
 import pandas as pd
 from thefuzz import fuzz
 
-DEBUG = 1
+DEBUG = 0
 ENABLE_FUZZY = 1 #Disabled for urls
 FUZZY_RATIO = 98
 
@@ -156,7 +156,7 @@ elif len(sys.argv) >= 3:
             sys.exit()
     elif(str(sys.argv[1]) == "-j"):
         mode = MODE_INPUT_POT
-        print("MODE INPUT POT")
+
         if( len(sys.argv) == 4 or len(sys.argv) == 5):
             
             csv_filename = str(sys.argv[3])
